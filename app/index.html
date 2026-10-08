@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+<title>Card Receipt</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="app">
+  <section class="browser" aria-label="TCGplayer">
+    <div class="bar">
+      <button class="nav" id="back" title="Back" aria-label="Back" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg></button>
+      <button class="nav" id="fwd" title="Forward" aria-label="Forward" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg></button>
+      <button class="nav" id="reload" title="Reload page" aria-label="Reload page"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.5 10a5.5 5.5 0 1 1-1.6-3.9M14.5 3v3.6h-3.6"/></svg></button>
+      <button class="home" id="home" title="TCGplayer home">TCGplayer</button>
+      <form class="search" id="search" role="search">
+        <input id="q" type="search" placeholder="Search TCGplayer for a card" aria-label="Search TCGplayer" autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+    <div class="progress" id="progress" hidden></div>
+    <div class="webwrap">
+      <webview id="web" src="https://www.tcgplayer.com/" partition="persist:tcgplayer" allowpopups></webview>
+      <div class="offline" id="offline" hidden>
+        <p><b>TCGplayer didn’t load.</b></p>
+        <p>Check the internet connection, then try again.</p>
+        <button id="retry">Try again</button>
+      </div>
+    </div>
+  </section>
+  <aside class="side" id="receipt" aria-label="Receipt"></aside>
+</div>
+<script src="core.js"></script>
+<script src="renderer.js"></script>
+</body>
+</html>

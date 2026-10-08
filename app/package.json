@@ -1,0 +1,7 @@
+{
+  "name": "card-receipt",
+  "productName": "Card Receipt",
+  "version": "1.0.0",
+  "description": "Build card receipts from TCGplayer prices.",
+  "main": "main.js"
+}
