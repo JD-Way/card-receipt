@@ -39,3 +39,7 @@ Saved receipts stay on the computer or browser that made them. In the desktop ap
 - `app/` desktop app source (Electron 44). `core.js` is the receipt panel shared with the bookmark version.
 - `bookmark/` bookmark version and its setup page. Run `python3 build.py` to rebuild `setup-page.html`.
 - `packaging/` scripts and icons used to package the Windows and Mac builds.
+
+## Publishing a new version
+
+Open the **Actions** tab, choose **Build and publish apps**, click **Run workflow**, enter a new version number (like 1.0.1) and click the green **Run workflow** button. GitHub builds the three zips and publishes them on the Releases page in about 10 minutes.

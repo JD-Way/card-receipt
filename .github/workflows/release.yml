@@ -1,0 +1,33 @@
+name: Build and publish apps
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version number, like 1.0.0
+        required: true
+        default: "1.0.0"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install image tools
+        run: sudo apt-get update -q && sudo apt-get install -y -q python3-pil zip unzip
+      - name: Build Windows and Mac apps
+        env:
+          VERSION: ${{ inputs.version }}
+        run: bash packaging/build-all.sh "$VERSION"
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          gh release create "v$VERSION" dist/*.zip \
+            --title "Card Receipt $VERSION" \
+            --notes-file packaging/release-notes.md \
+            --target "$GITHUB_SHA"
