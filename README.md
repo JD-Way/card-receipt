@@ -2,6 +2,8 @@
 
 Build card receipts from TCGplayer prices and your own inventory. Open a card's page on TCGplayer and click **Add this card**, or scan a barcode from your inventory. Adjust prices, add notes, then save, print or email the receipt.
 
+Sort the receipt by name, price or card number, group it by trading card game, or drag cards into any order.
+
 Also included: an inventory with barcode labels and stock counts, CSV import and export, an average of the checked prices, numbered receipts, a shop logo on printed receipts, color themes, and one-file backups.
 
 ## Download
@@ -42,7 +44,7 @@ Any USB or Bluetooth barcode scanner that types like a keyboard works. Click the
 
 ## Inventory CSV columns
 
-Import recognizes these column names (others are ignored): Barcode, Name, Set, Condition, Number, Rarity, Your Price (or Price), In Stock (or Quantity), TCGplayer Page, Market Price and Listed Median. A TCGplayer seller pricing export also works: it uses Product Name, Set Name, TCG Marketplace Price, Total Quantity and TCGplayer Id. Rows that match an existing barcode, or the same TCGplayer page and condition, update that item.
+Import recognizes these column names (others are ignored): Barcode, Name, Game (or Product Line), Set, Condition, Number, Rarity, Your Price (or Price), In Stock (or Quantity), TCGplayer Page, Market Price and Listed Median. A TCGplayer seller pricing export also works: it uses Product Name, Set Name, TCG Marketplace Price, Total Quantity and TCGplayer Id. Rows that match an existing barcode, or the same TCGplayer page and condition, update that item.
 
 ## Project layout
 

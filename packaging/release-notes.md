@@ -5,13 +5,12 @@
 
 Each zip has a "Read me first" file with install steps. The first time you open the app, Windows or macOS shows a warning because the app isn't signed yet. The read-me explains how to get past it.
 
-**What's new in 1.1**
-- **Inventory with barcodes.** Add cards from TCGplayer, by hand, or from a CSV file (including a TCGplayer seller export). Scan existing barcode labels or let the app make them, and print price labels on Avery 5160 sheets or label rolls.
-- **Scan to add.** Scan an inventory barcode to put it on the receipt. Saving a receipt takes those cards out of stock; deleting it puts them back.
-- **Average price.** Show the average of the checked prices on each card and use it as the starting price if you like.
-- **Receipt numbers.** Saved receipts are numbered from #1001 and searchable by number.
-- **Shop logo and colors.** Add a logo to printed receipts, pick a color, and switch to dark mode in Settings.
-- **Backups.** Save receipts, inventory and settings to one file and restore them on any computer.
-- **Update notice.** The app tells you when a newer version is on this page.
+**What's new in 1.2**
+- **Sort the receipt.** Sort by name, price (high to low or low to high) or card number from the new Sort menu.
+- **Group by game.** Turn on Group by game to arrange cards under their trading card game, with a subtotal for each. Printed and emailed receipts use the same order.
+- **Drag to rearrange.** Drag the dotted handle beside a card to put it anywhere, or use the up and down arrow keys.
+- **Game on every card.** The app works out the game from the TCGplayer page. Tap the game under a card's name to change it. Inventory items and CSV files have a Game column too.
+
+**From 1.1:** inventory with barcodes and labels, scan to add, average price, receipt numbers, shop logo and colors, and backups.
 
 Your existing receipts carry over when you install this version.

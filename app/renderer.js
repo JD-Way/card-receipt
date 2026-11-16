@@ -9,7 +9,7 @@
     mount: document.getElementById('receipt'),
     store: { get: function (k) { return api.storeGet(k); }, set: function (k, v) { api.storeSet(k, v); } },
     readPage: function () {
-      return web.executeJavaScript('(function(){var h=document.querySelector("h1");return{text:document.body?document.body.innerText:"",url:location.href,h1:h?h.innerText:"",title:document.title,host:location.hostname};})()');
+      return web.executeJavaScript('(' + cardReceiptReadPage.toString() + ')()');
     },
     isCardSite: function (h) { return /(^|\.)tcgplayer\.com$/i.test(h || ''); },
     openMail: function (href) { api.openMail(href); },
