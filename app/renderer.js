@@ -14,6 +14,12 @@
     isCardSite: function (h) { return /(^|\.)tcgplayer\.com$/i.test(h || ''); },
     openMail: function (href) { api.openMail(href); },
     copyText: function (t) { return api.copyText(t); },
+    saveFile: function (name, text) { return api.saveFile(name, text); },
+    onTheme: function (v, dark) {
+      var root = document.documentElement.style;
+      Object.keys(v).forEach(function (k) { root.setProperty('--' + k, v[k]); });
+      root.colorScheme = dark ? 'dark' : 'light';
+    },
     openLink: function (url) { if (isTcg(url)) web.loadURL(url); }
   });
 
@@ -40,12 +46,23 @@
     if (e.isMainFrame && e.errorCode !== -3) { progress.hidden = true; offline.hidden = false; }
   });
 
+  var upd = document.getElementById('update');
+  api.onUpdate(function (info) {
+    document.getElementById('upv').textContent = info && info.version ? info.version : 'A new version';
+    upd.hidden = false;
+  });
+  document.getElementById('upget').addEventListener('click', function () { api.openRelease(); });
+  document.getElementById('upx').addEventListener('click', function () { upd.hidden = true; });
+
   api.onMenu(function (cmd) {
     if (cmd === 'add') receipt.add();
     else if (cmd === 'save') receipt.save();
     else if (cmd === 'print') receipt.print();
     else if (cmd === 'email') receipt.email();
     else if (cmd === 'saved') receipt.showSaved();
+    else if (cmd === 'inventory') receipt.showInventory();
+    else if (cmd === 'settings') receipt.showSettings();
+    else if (cmd === 'scan') receipt.scan();
     else if (cmd === 'back' && web.canGoBack()) web.goBack();
     else if (cmd === 'forward' && web.canGoForward()) web.goForward();
     else if (cmd === 'reload') web.reload();

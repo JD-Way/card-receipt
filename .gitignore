@@ -1,2 +1,5 @@
 .work/
 dist/
+__pycache__/
+bookmark/receipt.js
+bookmark/setup-page.html

@@ -5,4 +5,13 @@
 
 Each zip has a "Read me first" file with install steps. The first time you open the app, Windows or macOS shows a warning because the app isn't signed yet. The read-me explains how to get past it.
 
-**What it does:** TCGplayer opens on the left and your receipt is on the right. Open a card's page and click **Add this card** to pull its Market Price, Listed Median and other prices. Adjust prices, add notes, then save, print or email the receipt. Saved receipts can be reopened and edited.
+**What's new in 1.1**
+- **Inventory with barcodes.** Add cards from TCGplayer, by hand, or from a CSV file (including a TCGplayer seller export). Scan existing barcode labels or let the app make them, and print price labels on Avery 5160 sheets or label rolls.
+- **Scan to add.** Scan an inventory barcode to put it on the receipt. Saving a receipt takes those cards out of stock; deleting it puts them back.
+- **Average price.** Show the average of the checked prices on each card and use it as the starting price if you like.
+- **Receipt numbers.** Saved receipts are numbered from #1001 and searchable by number.
+- **Shop logo and colors.** Add a logo to printed receipts, pick a color, and switch to dark mode in Settings.
+- **Backups.** Save receipts, inventory and settings to one file and restore them on any computer.
+- **Update notice.** The app tells you when a newer version is on this page.
+
+Your existing receipts carry over when you install this version.

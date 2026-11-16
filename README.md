@@ -1,6 +1,8 @@
 # Card Receipt
 
-Build card receipts from TCGplayer prices. Open a card's page on TCGplayer, click **Add this card**, and its Market Price, Listed Median, other price points and page link go onto a receipt. Adjust prices, add notes, then save, print or email the receipt.
+Build card receipts from TCGplayer prices and your own inventory. Open a card's page on TCGplayer and click **Add this card**, or scan a barcode from your inventory. Adjust prices, add notes, then save, print or email the receipt.
+
+Also included: an inventory with barcode labels and stock counts, CSV import and export, an average of the checked prices, numbered receipts, a shop logo on printed receipts, color themes, and one-file backups.
 
 ## Download
 
@@ -30,14 +32,22 @@ If macOS says the app is damaged, run `xattr -cr "/Applications/Card Receipt.app
 
 On iPhone, iPad and Android, use the bookmark version: a bookmark that adds the same receipt panel to TCGplayer in the browser. The setup page is in `bookmark/`.
 
-## Saved receipts
+## Your data
 
-Saved receipts stay on the computer or browser that made them. In the desktop app, choose **Receipt > Show saved receipts file** to find the file and back it up.
+Receipts, inventory and settings stay on the computer or browser that made them. Use **Settings > Back up all data** to save everything to one file, and **Restore backup** to load it on another device. In the desktop app, **Receipt > Show data folder** opens the folder with the data files.
+
+## Barcode scanners
+
+Any USB or Bluetooth barcode scanner that types like a keyboard works. Click the barcode box on the receipt (or press Ctrl+B / Cmd+B in the desktop app) and scan. Set the scanner to send Enter after each scan, which is the usual factory setting.
+
+## Inventory CSV columns
+
+Import recognizes these column names (others are ignored): Barcode, Name, Set, Condition, Number, Rarity, Your Price (or Price), In Stock (or Quantity), TCGplayer Page, Market Price and Listed Median. A TCGplayer seller pricing export also works: it uses Product Name, Set Name, TCG Marketplace Price, Total Quantity and TCGplayer Id. Rows that match an existing barcode, or the same TCGplayer page and condition, update that item.
 
 ## Project layout
 
 - `app/` desktop app source (Electron 44). `core.js` is the receipt panel shared with the bookmark version.
-- `bookmark/` bookmark version and its setup page. Run `python3 build.py` to rebuild `setup-page.html`.
+- `bookmark/` bookmark version and its setup page. Run `python3 bookmark/build.py` to build `bookmark/setup-page.html` from `app/core.js`.
 - `packaging/` scripts and icons used to package the Windows and Mac builds.
 
 ## Publishing a new version
