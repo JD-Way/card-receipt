@@ -1,0 +1,21 @@
+name: Make a test version the latest
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version number of the test version, like 1.3.0
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Mark the release as the latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: gh release edit "v$VERSION" --repo "$GITHUB_REPOSITORY" --prerelease=false --latest

@@ -2,7 +2,9 @@
 
 Build card receipts from TCGplayer prices and your own inventory. Open a card's page on TCGplayer and click **Add this card**, or scan a barcode from your inventory. Adjust prices, add notes, then save, print or email the receipt.
 
-Sort the receipt by name, price or card number, group it by trading card game, or drag cards into any order.
+Sort the receipt by name, price or card number, or drag cards into any order.
+
+**Export** prints the receipt, emails it with a PDF attached, or saves it as a PDF, a PNG picture, a CSV file or an Excel (.xls) file. The CSV and Excel files have these columns, one row per card: Item #, Item Name, Attribute, Size, Qty, Price, Ext Price, Tax Code. Item #, Attribute, Size and Tax Code are left blank, and there is no total row.
 
 Also included: an inventory with barcode labels and stock counts, CSV import and export, an average of the checked prices, numbered receipts, a shop logo on printed receipts, color themes, and one-file backups.
 
@@ -37,6 +39,16 @@ On iPhone, iPad and Android, use the bookmark version: a bookmark that adds the 
 ## Your data
 
 Receipts, inventory and settings stay on the computer or browser that made them. Use **Settings > Back up all data** to save everything to one file, and **Restore backup** to load it on another device. In the desktop app, **Receipt > Show data folder** opens the folder with the data files.
+
+## Emailing receipts
+
+**Email with PDF** attaches the receipt as a PDF:
+
+- **Windows desktop app:** opens your default email program (classic Outlook, Thunderbird and others that support "Send to mail recipient") with the PDF attached.
+- **Mac desktop app:** opens a new message in Apple Mail or Outlook with the PDF attached. The first time, macOS asks to let Card Receipt control Mail. Click OK.
+- **Phones, tablets and browsers:** opens the share menu with the PDF attached. Choose Mail or your email app.
+
+If none of these work (for example, you use Gmail in a web browser), the PDF is saved, its folder opens, and a new email opens with the receipt as text so you can drag the PDF in.
 
 ## Barcode scanners
 

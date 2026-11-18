@@ -7,6 +7,10 @@ on:
         description: Version number, like 1.0.0
         required: true
         default: "1.0.0"
+      test_version:
+        description: Test version (shops don't see it until it's made the latest)
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -26,8 +30,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
+          TEST: ${{ inputs.test_version }}
         run: |
+          EXTRA=""
+          if [ "$TEST" = "true" ]; then EXTRA="--prerelease"; fi
           gh release create "v$VERSION" dist/*.zip \
             --title "Card Receipt $VERSION" \
             --notes-file packaging/release-notes.md \
-            --target "$GITHUB_SHA"
+            --target "$GITHUB_SHA" $EXTRA

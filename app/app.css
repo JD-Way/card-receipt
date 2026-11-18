@@ -1,4 +1,4 @@
-:root{--bg:#FFFFFF;--ink:#1E2230;--mut:#5D6475;--line:#D6DAE2;--fb:#C9CED8;--field:#FFFFFF;--soft:#EEF0F4;--acc:#5B2DC9;--acc-ink:#FFFFFF;--acc-soft:#EFEAFA;--btn:#1E2230;--btn-ink:#FFFFFF;--page:#EEF0F4}
+:root{--bg:#FFFFFF;--ink:#1E2230;--mut:#5D6475;--line:#D6DAE2;--fb:#C9CED8;--field:#FFFFFF;--soft:#EEF0F4;--acc:#5B2DC9;--acc-ink:#FFFFFF;--acc-soft:#EFEAFA;--acc-txt:#5B2DC9;--btn:#1E2230;--btn-ink:#FFFFFF;--page:#EEF0F4}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--soft);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:15px}
 .app{display:grid;grid-template-columns:minmax(0,1fr) 400px;height:100vh}
@@ -28,4 +28,4 @@ webview{position:absolute;inset:0;width:100%;height:100%;background:#fff}
 .offline button{margin-top:14px;border:0;border-radius:10px;background:var(--acc);color:var(--acc-ink);font:inherit;font-weight:700;padding:11px 18px;cursor:pointer}
 .side{min-height:0;height:100vh}
 [hidden]{display:none!important}
-button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc-txt);outline-offset:2px}

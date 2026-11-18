@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell, Menu, clipboard, dialog, net } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { execFile } = require('child_process');
 
 app.setName('Card Receipt');
 // Present as a normal Chrome browser to websites.
@@ -41,14 +42,141 @@ ipcMain.on('store-set', (e, key, value) => {
 });
 ipcMain.on('open-mail', (_e, href) => { if (typeof href === 'string' && href.startsWith('mailto:')) shell.openExternal(href); });
 ipcMain.handle('copy-text', (_e, text) => { clipboard.writeText(String(text || '')); return true; });
-ipcMain.handle('save-file', async (e, name, text) => {
-  const safe = String(name || 'card-receipt.txt').replace(/[\\/:*?"<>|]+/g, '-');
+const FILE_TYPES = {
+  csv: 'CSV file', json: 'Backup file', pdf: 'PDF document', png: 'PNG image', xls: 'Excel workbook'
+};
+function safeName(name, fallback) { return String(name || fallback).replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-').slice(0, 120); }
+function toBuffer(data) { return typeof data === 'string' ? Buffer.from(data, 'utf8') : Buffer.from(data || []); }
+ipcMain.handle('save-file', async (e, name, data) => {
+  const safe = safeName(name, 'card-receipt.txt');
   const ext = path.extname(safe).slice(1).toLowerCase();
-  const filters = ext === 'csv' ? [{ name: 'CSV file', extensions: ['csv'] }] : ext === 'json' ? [{ name: 'Backup file', extensions: ['json'] }] : [];
+  const filters = FILE_TYPES[ext] ? [{ name: FILE_TYPES[ext], extensions: [ext] }] : [];
   const parent = BrowserWindow.fromWebContents(e.sender) || win;
   const r = await dialog.showSaveDialog(parent, { defaultPath: path.join(app.getPath('documents'), safe), filters });
   if (r.canceled || !r.filePath) return 'canceled';
-  try { fs.writeFileSync(r.filePath, String(text == null ? '' : text), 'utf8'); return 'saved'; } catch (err) { return 'failed'; }
+  try { fs.writeFileSync(r.filePath, toBuffer(data)); return 'saved'; } catch (err) { return 'failed'; }
+});
+
+/* ----- Email with the receipt PDF attached ----- */
+// Windows: Simple MAPI opens the default mail program (Outlook, Thunderbird and others) with the file attached.
+const MAPI_PS = [
+  "$ErrorActionPreference = 'Stop'",
+  "Add-Type -TypeDefinition @'",
+  "using System;",
+  "using System.Runtime.InteropServices;",
+  "public static class CardReceiptMapi {",
+  "  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]",
+  "  public struct Msg { public int reserved; public string subject; public string noteText; public string messageType; public string dateReceived; public string conversationID; public int flags; public IntPtr originator; public int recipCount; public IntPtr recips; public int fileCount; public IntPtr files; }",
+  "  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]",
+  "  public struct Recip { public int reserved; public int recipClass; public string name; public string address; public int eIDSize; public IntPtr entryID; }",
+  "  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]",
+  "  public struct FileDesc { public int reserved; public int flags; public int position; public string pathName; public string fileName; public IntPtr fileType; }",
+  "  [DllImport(\"MAPI32.DLL\", CharSet = CharSet.Unicode)]",
+  "  static extern int MAPISendMailW(IntPtr session, IntPtr uiParam, ref Msg message, int flags, int reserved);",
+  "  public static int Send(string to, string subject, string body, string path, string name) {",
+  "    Msg m = new Msg(); m.subject = subject; m.noteText = body;",
+  "    FileDesc f = new FileDesc(); f.position = -1; f.pathName = path; f.fileName = name;",
+  "    m.fileCount = 1; m.files = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(FileDesc))); Marshal.StructureToPtr(f, m.files, false);",
+  "    if (!String.IsNullOrEmpty(to)) {",
+  "      Recip r = new Recip(); r.recipClass = 1; r.name = to; r.address = \"SMTP:\" + to;",
+  "      m.recipCount = 1; m.recips = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(Recip))); Marshal.StructureToPtr(r, m.recips, false);",
+  "    }",
+  "    return MAPISendMailW(IntPtr.Zero, IntPtr.Zero, ref m, 9, 0);",
+  "  }",
+  "}",
+  "'@",
+  "exit (100 + [CardReceiptMapi]::Send($env:CR_TO, $env:CR_SUBJECT, $env:CR_BODY, $env:CR_FILE, $env:CR_NAME))"
+].join('\n');
+function runMapi(exe, file, m) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (ok) => { if (!done) { done = true; resolve(ok); } };
+    const env = Object.assign({}, process.env, {
+      CR_TO: m.to || '', CR_SUBJECT: m.subject || '', CR_BODY: String(m.body || '').replace(/\r?\n/g, '\r\n'),
+      CR_FILE: file, CR_NAME: path.basename(file)
+    });
+    try {
+      execFile(exe, ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-STA', '-EncodedCommand', Buffer.from(MAPI_PS, 'utf16le').toString('base64')],
+        { env, windowsHide: true }, (err) => {
+          const code = err ? err.code : 0;
+          finish(code === 100 || code === 101); // 0 = sent, 1 = the person closed the email
+        });
+    } catch (err) { finish(false); return; }
+    // The call waits while the email window is open, so a process still running means it opened.
+    setTimeout(() => finish(true), 15000);
+  });
+}
+async function emailWindows(file, m) {
+  const root = process.env.SystemRoot || 'C:\\Windows';
+  if (await runMapi(path.join(root, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe'), file, m)) return true;
+  // A 32-bit Outlook only answers 32-bit programs.
+  const wow = path.join(root, 'SysWOW64', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+  return fs.existsSync(wow) ? runMapi(wow, file, m) : false;
+}
+// Mac: AppleScript for Apple Mail or Outlook, whichever opens email links.
+const MAIL_SCRIPT = [
+  'on run argv',
+  '  set theTo to item 1 of argv',
+  '  set theSubject to item 2 of argv',
+  '  set theBody to item 3 of argv',
+  '  set theFile to (POSIX file (item 4 of argv)) as alias',
+  '  tell application "Mail"',
+  '    set newMessage to make new outgoing message with properties {subject:theSubject, content:theBody & return & return, visible:true}',
+  '    tell newMessage',
+  '      if theTo is not "" then make new to recipient at end of to recipients with properties {address:theTo}',
+  '      tell content to make new attachment with properties {file name:theFile} at after the last paragraph',
+  '    end tell',
+  '    activate',
+  '  end tell',
+  'end run'
+].join('\n');
+const OUTLOOK_SCRIPT = [
+  'on run argv',
+  '  set theTo to item 1 of argv',
+  '  set theSubject to item 2 of argv',
+  '  set theBody to item 5 of argv',
+  '  set theFile to (POSIX file (item 4 of argv)) as alias',
+  '  tell application "Microsoft Outlook"',
+  '    set newMessage to make new outgoing message with properties {subject:theSubject, content:theBody}',
+  '    if theTo is not "" then make new to recipient at newMessage with properties {email address:{address:theTo}}',
+  '    make new attachment at newMessage with properties {file:theFile}',
+  '    open newMessage',
+  '    activate',
+  '  end tell',
+  'end run'
+].join('\n');
+function escHtml(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function emailMac(file, m) {
+  let handler = '';
+  try { handler = app.getApplicationNameForProtocol('mailto:') || ''; } catch (e) { handler = ''; }
+  const script = /outlook/i.test(handler) ? OUTLOOK_SCRIPT : (!handler || /^mail(\.app)?$/i.test(handler)) ? MAIL_SCRIPT : null;
+  if (!script) return Promise.resolve(false);
+  const html = escHtml(m.body || '').replace(/\n/g, '<br>');
+  return new Promise((resolve) => {
+    execFile('osascript', ['-e', script, m.to || '', m.subject || '', m.body || '', file, html], { timeout: 60000 }, (err) => resolve(!err));
+  });
+}
+function tidyAttachments(dir) {
+  try {
+    const old = Date.now() - 30 * 24 * 3600 * 1000;
+    fs.readdirSync(dir).forEach((f) => { const p = path.join(dir, f); try { if (fs.statSync(p).mtimeMs < old) fs.unlinkSync(p); } catch (e) {} });
+  } catch (e) {}
+}
+ipcMain.handle('email-pdf', async (_e, m) => {
+  m = m || {};
+  const dir = path.join(app.getPath('userData'), 'Email attachments');
+  fs.mkdirSync(dir, { recursive: true });
+  tidyAttachments(dir);
+  const file = path.join(dir, safeName(m.name, 'receipt.pdf'));
+  try { fs.writeFileSync(file, toBuffer(m.data)); } catch (e) { return { result: 'failed' }; }
+  let ok = false;
+  try {
+    if (process.platform === 'win32') ok = await emailWindows(file, m);
+    else if (process.platform === 'darwin') ok = await emailMac(file, m);
+  } catch (e) { ok = false; }
+  if (ok) return { result: 'opened', path: file };
+  shell.showItemInFolder(file);
+  return { result: 'fallback', path: file };
 });
 ipcMain.on('open-release', () => shell.openExternal(RELEASES));
 

@@ -14,7 +14,8 @@
     isCardSite: function (h) { return /(^|\.)tcgplayer\.com$/i.test(h || ''); },
     openMail: function (href) { api.openMail(href); },
     copyText: function (t) { return api.copyText(t); },
-    saveFile: function (name, text) { return api.saveFile(name, text); },
+    saveFile: function (name, data) { return api.saveFile(name, data); },
+    emailPdf: function (m) { return api.emailPdf(m); },
     onTheme: function (v, dark) {
       var root = document.documentElement.style;
       Object.keys(v).forEach(function (k) { root.setProperty('--' + k, v[k]); });

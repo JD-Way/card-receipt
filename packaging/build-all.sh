@@ -71,7 +71,7 @@ import plistlib,sys,os,glob
 A,v=sys.argv[1],sys.argv[2]
 p=os.path.join(A,'Info.plist'); d=plistlib.load(open(p,'rb'))
 d.update({'CFBundleDisplayName':'Card Receipt','CFBundleName':'Card Receipt','CFBundleIdentifier':'com.cardreceipt.desktop',
- 'CFBundleShortVersionString':v,'CFBundleVersion':v,'NSHumanReadableCopyright':'Card Receipt','LSApplicationCategoryType':'public.app-category.business'})
+ 'CFBundleShortVersionString':v,'CFBundleVersion':v,'NSHumanReadableCopyright':'Card Receipt','LSApplicationCategoryType':'public.app-category.business','NSAppleEventsUsageDescription':'Card Receipt opens a new email in Mail or Outlook with the receipt PDF attached.'})
 d.pop('ElectronAsarIntegrity',None); plistlib.dump(d,open(p,'wb'))
 for h in glob.glob(os.path.join(A,'Frameworks','*.app')):
     p=os.path.join(h,'Contents','Info.plist'); d=plistlib.load(open(p,'rb'))
