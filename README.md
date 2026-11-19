@@ -2,11 +2,13 @@
 
 Build card receipts from TCGplayer prices and your own inventory. Open a card's page on TCGplayer and click **Add this card**, or scan a barcode from your inventory. Adjust prices, add notes, then save, print or email the receipt.
 
-Sort the receipt by name, price or card number, or drag cards into any order. **Simple view** shows just each card's name and receipt price, and dragging still works there.
+Sort the receipt by name, price or card number, or drag cards into any order. **Simple view** shows just each card's name, quantity (with − and + buttons) and receipt price, and dragging still works there. Settings > Receipt screen lets you hide more in simple view (tabs, saved status, barcode bar, sort menu, quantity, price, Prices and links, Customer, Total) and turn off the barcode bar everywhere. Add this card, the Simple view button and the bottom row of buttons always stay.
 
-**Rounding** turns picked TCGplayer prices into shop-friendly prices. By default, cents from .01 to .30 round to .25 and .31 to .49 round to .50 (so $4.12 becomes $4.25 and $4.40 becomes $4.50). Change, add or remove the rules in Settings > Rounding. Prices you type yourself are never rounded. **Hide price details on the receipt** (under Prices and links) leaves the TCGplayer reference prices and the "Prices as of" line off the printed, emailed and saved receipt.
+**Rounding** turns picked TCGplayer prices into shop-friendly prices. By default, cents from .01 to .30 round to .25 and .31 to .49 round to .50 (so $4.12 becomes $4.25 and $4.40 becomes $4.50). Change, add or remove the rules in Settings > Rounding. Prices you type yourself are never rounded. **Only show sale price on receipt** (under Prices and links) leaves the TCGplayer reference prices and the "Prices as of" line off the printed, emailed and saved receipt. **Show customer name on receipt** (under Customer) controls whether the customer's name prints.
 
-**Export** prints the receipt, emails it with a PDF attached, or saves it as a PDF, a PNG picture, a CSV file or an Excel (.xls) file. The CSV and Excel files have these columns, one row per card: Item #, Item Name, Attribute, Size, Qty, Price, Ext Price, Tax Code. Item #, Attribute, Size and Tax Code are left blank, and there is no total row.
+**Auto save** (Settings > Auto save) saves the open receipt within 5 minutes of any change. The first auto save gives it a receipt number; later ones update that same receipt.
+
+**Export** prints the receipt, emails it with a PDF attached, makes a **Share list** (each card's name and full TCGplayer link, to copy, share, email or save as text), or saves it as a PDF, a PNG picture, a CSV file or an Excel (.xls) file. The CSV and Excel files have these columns, one row per card: Item #, Item Name, Attribute, Size, Qty, Price, Ext Price, Tax Code. Item #, Attribute, Size and Tax Code are left blank, and there is no total row.
 
 Also included: an inventory with barcode labels and stock counts, CSV import and export, an average of the checked prices, numbered receipts, a shop logo on printed receipts, color themes, and one-file backups.
 

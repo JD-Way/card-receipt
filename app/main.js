@@ -43,7 +43,7 @@ ipcMain.on('store-set', (e, key, value) => {
 ipcMain.on('open-mail', (_e, href) => { if (typeof href === 'string' && href.startsWith('mailto:')) shell.openExternal(href); });
 ipcMain.handle('copy-text', (_e, text) => { clipboard.writeText(String(text || '')); return true; });
 const FILE_TYPES = {
-  csv: 'CSV file', json: 'Backup file', pdf: 'PDF document', png: 'PNG image', xls: 'Excel workbook'
+  csv: 'CSV file', json: 'Backup file', pdf: 'PDF document', png: 'PNG image', txt: 'Text file', xls: 'Excel workbook'
 };
 function safeName(name, fallback) { return String(name || fallback).replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-').slice(0, 120); }
 function toBuffer(data) { return typeof data === 'string' ? Buffer.from(data, 'utf8') : Buffer.from(data || []); }
