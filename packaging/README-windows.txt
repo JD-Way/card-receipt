@@ -11,4 +11,4 @@ Card Receipt for Windows
 Keep all the files in the folder together. The app needs them.
 
 Saved receipts are kept on this computer. To find the file, press Alt to
-show the menu, then choose Receipt > Show saved receipts file.
+show the menu, then choose Receipt > Show data folder.

@@ -73,7 +73,28 @@ const MAPI_PS = [
   "  public struct FileDesc { public int reserved; public int flags; public int position; public string pathName; public string fileName; public IntPtr fileType; }",
   "  [DllImport(\"MAPI32.DLL\", CharSet = CharSet.Unicode)]",
   "  static extern int MAPISendMailW(IntPtr session, IntPtr uiParam, ref Msg message, int flags, int reserved);",
+  "  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]",
+  "  public struct MsgA { public int reserved; public string subject; public string noteText; public string messageType; public string dateReceived; public string conversationID; public int flags; public IntPtr originator; public int recipCount; public IntPtr recips; public int fileCount; public IntPtr files; }",
+  "  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]",
+  "  public struct RecipA { public int reserved; public int recipClass; public string name; public string address; public int eIDSize; public IntPtr entryID; }",
+  "  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]",
+  "  public struct FileDescA { public int reserved; public int flags; public int position; public string pathName; public string fileName; public IntPtr fileType; }",
+  "  [DllImport(\"MAPI32.DLL\", CharSet = CharSet.Ansi)]",
+  "  static extern int MAPISendMail(IntPtr session, IntPtr uiParam, ref MsgA message, int flags, int reserved);",
   "  public static int Send(string to, string subject, string body, string path, string name) {",
+  "    try { return SendW(to, subject, body, path, name); } catch (EntryPointNotFoundException) { return SendA(to, subject, body, path, name); }",
+  "  }",
+  "  static int SendA(string to, string subject, string body, string path, string name) {",
+  "    MsgA m = new MsgA(); m.subject = subject; m.noteText = body;",
+  "    FileDescA f = new FileDescA(); f.position = -1; f.pathName = path; f.fileName = name;",
+  "    m.fileCount = 1; m.files = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(FileDescA))); Marshal.StructureToPtr(f, m.files, false);",
+  "    if (!String.IsNullOrEmpty(to)) {",
+  "      RecipA r = new RecipA(); r.recipClass = 1; r.name = to; r.address = \"SMTP:\" + to;",
+  "      m.recipCount = 1; m.recips = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(RecipA))); Marshal.StructureToPtr(r, m.recips, false);",
+  "    }",
+  "    return MAPISendMail(IntPtr.Zero, IntPtr.Zero, ref m, 9, 0);",
+  "  }",
+  "  static int SendW(string to, string subject, string body, string path, string name) {",
   "    Msg m = new Msg(); m.subject = subject; m.noteText = body;",
   "    FileDesc f = new FileDesc(); f.position = -1; f.pathName = path; f.fileName = name;",
   "    m.fileCount = 1; m.files = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(FileDesc))); Marshal.StructureToPtr(f, m.files, false);",
@@ -185,11 +206,27 @@ function newer(a, b) {
   for (let i = 0; i < 3; i++) { if ((pa[i] || 0) > (pb[i] || 0)) return true; if ((pa[i] || 0) < (pb[i] || 0)) return false; }
   return false;
 }
+// net.fetch is newer than the Windows 7 engine, so fall back to net.request there.
+function getJson(url) {
+  const headers = { 'Accept': 'application/vnd.github+json', 'User-Agent': 'Card-Receipt/' + app.getVersion() };
+  if (typeof net.fetch === 'function') return net.fetch(url, { headers }).then((r) => (r.ok ? r.json() : null));
+  return new Promise((resolve) => {
+    const req = net.request({ url, method: 'GET' });
+    Object.keys(headers).forEach((k) => req.setHeader(k, headers[k]));
+    req.on('response', (res) => {
+      const chunks = [];
+      res.on('data', (c) => chunks.push(c));
+      res.on('end', () => { try { resolve(res.statusCode === 200 ? JSON.parse(Buffer.concat(chunks).toString('utf8')) : null); } catch (e) { resolve(null); } });
+      res.on('error', () => resolve(null));
+    });
+    req.on('error', () => resolve(null));
+    req.end();
+  });
+}
 async function checkForUpdate() {
   try {
-    const res = await net.fetch(RELEASES_API, { headers: { 'Accept': 'application/vnd.github+json', 'User-Agent': 'Card-Receipt/' + app.getVersion() } });
-    if (!res.ok) return;
-    const rel = await res.json();
+    const rel = await getJson(RELEASES_API);
+    if (!rel) return;
     if (rel && rel.tag_name && newer(rel.tag_name, app.getVersion()) && win && !win.isDestroyed()) {
       win.webContents.send('update', { version: String(rel.tag_name).replace(/^v/, '') });
     }
@@ -250,7 +287,8 @@ function editMenu(contents, params) {
   else if (params.selectionText) items.push({ role: 'copy' });
   if (contents.getType() === 'webview') {
     if (items.length) items.push({ type: 'separator' });
-    items.push({ label: 'Back', enabled: contents.navigationHistory.canGoBack(), click: () => contents.navigationHistory.goBack() });
+    const nav = contents.navigationHistory || contents;
+    items.push({ label: 'Back', enabled: nav.canGoBack(), click: () => nav.goBack() });
     items.push({ label: 'Reload', click: () => contents.reload() });
   }
   if (items.length) Menu.buildFromTemplate(items).popup();
@@ -271,7 +309,12 @@ app.on('web-contents-created', (_e, contents) => {
       else if (/^https?:/i.test(url)) shell.openExternal(url);
       return { action: 'deny' };
     });
-    contents.on('will-navigate', (ev, url) => { if (!/^https?:/i.test(url)) { ev.preventDefault(); if (/^mailto:/i.test(url)) shell.openExternal(url); } });
+    // Keep the built-in browser on TCGplayer; other sites open in the computer's own browser.
+    contents.on('will-navigate', (ev, url) => {
+      if (isTcg(url)) return;
+      ev.preventDefault();
+      if (/^(https?|mailto):/i.test(url)) shell.openExternal(url);
+    });
   }
 });
 

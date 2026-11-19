@@ -2,7 +2,9 @@
 
 Build card receipts from TCGplayer prices and your own inventory. Open a card's page on TCGplayer and click **Add this card**, or scan a barcode from your inventory. Adjust prices, add notes, then save, print or email the receipt.
 
-Sort the receipt by name, price or card number, or drag cards into any order.
+Sort the receipt by name, price or card number, or drag cards into any order. **Simple view** shows just each card's name and receipt price, and dragging still works there.
+
+**Rounding** turns picked TCGplayer prices into shop-friendly prices. By default, cents from .01 to .30 round to .25 and .31 to .49 round to .50 (so $4.12 becomes $4.25 and $4.40 becomes $4.50). Change, add or remove the rules in Settings > Rounding. Prices you type yourself are never rounded. **Hide price details on the receipt** (under Prices and links) leaves the TCGplayer reference prices and the "Prices as of" line off the printed, emailed and saved receipt.
 
 **Export** prints the receipt, emails it with a PDF attached, or saves it as a PDF, a PNG picture, a CSV file or an Excel (.xls) file. The CSV and Excel files have these columns, one row per card: Item #, Item Name, Attribute, Size, Qty, Price, Ext Price, Tax Code. Item #, Attribute, Size and Tax Code are left blank, and there is no total row.
 
@@ -13,6 +15,7 @@ Also included: an inventory with barcode labels and stock counts, CSV import and
 Get the latest version from the **Releases** page (right side of this page):
 
 - **Card-Receipt-Windows.zip** for Windows 10 or 11 (64-bit)
+- **Card-Receipt-Windows7-32bit.zip** for Windows 7 SP1, 8 or 8.1 (32-bit or 64-bit)
 - **Card-Receipt-Mac-AppleSilicon.zip** for Macs with an M1 chip or newer
 - **Card-Receipt-Mac-Intel.zip** for Macs with an Intel processor
 
@@ -23,6 +26,10 @@ The Mac versions need macOS 13 Ventura or newer. Each zip has a "Read me first" 
 1. Right-click the zip and choose **Extract All**. Keep the **Card Receipt** folder somewhere permanent, like Documents.
 2. Double-click **Card Receipt.exe**.
 3. If Windows shows "Windows protected your PC", click **More info**, then **Run anyway**. This only happens the first time.
+
+### Windows 7
+
+Use **Card-Receipt-Windows7-32bit.zip**. Install it the same way; Windows 7 may show "Open File - Security Warning" instead, so click **Run**. This version runs on an older engine (Electron 22) that no longer gets security updates, and neither does Windows 7. The app only opens TCGplayer pages, but it's best not to sign in to accounts or pay for anything inside it. Use it on the counter computer and keep everything else on a newer device when you can.
 
 ### Mac
 
@@ -60,10 +67,10 @@ Import recognizes these column names (others are ignored): Barcode, Name, Game (
 
 ## Project layout
 
-- `app/` desktop app source (Electron 44). `core.js` is the receipt panel shared with the bookmark version.
+- `app/` desktop app source (Electron 44, and Electron 22 for the Windows 7 build). `core.js` is the receipt panel shared with the bookmark version.
 - `bookmark/` bookmark version and its setup page. Run `python3 bookmark/build.py` to build `bookmark/setup-page.html` from `app/core.js`.
 - `packaging/` scripts and icons used to package the Windows and Mac builds.
 
 ## Publishing a new version
 
-Open the **Actions** tab, choose **Build and publish apps**, click **Run workflow**, enter a new version number (like 1.0.1) and click the green **Run workflow** button. GitHub builds the three zips and publishes them on the Releases page in about 10 minutes.
+Open the **Actions** tab, choose **Build and publish apps**, click **Run workflow**, enter a new version number (like 1.0.1) and click the green **Run workflow** button. GitHub builds the four zips and publishes them on the Releases page in about 10 minutes.

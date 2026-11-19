@@ -4,6 +4,8 @@ set -euo pipefail
 VERSION="${1:-1.0.0}"
 [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Version must look like 1.2.3"; exit 1; }
 ELECTRON=44.4.0
+# Electron 22 is the last version that runs on Windows 7. It no longer gets security fixes.
+ELECTRON_WIN7=22.3.27
 RCS_URL="https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.29.0/apple-codesign-0.29.0-x86_64-unknown-linux-musl.tar.gz"
 RCS_SHA=dbe85cedd8ee4217b64e9a0e4c2aef92ab8bcaaa41f20bde99781ff02e600002
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -22,6 +24,11 @@ for P in win32-x64 darwin-arm64 darwin-x64; do
 done
 curl -fsSL -o rcodesign.tgz "$RCS_URL"
 echo "$RCS_SHA  rcodesign.tgz" | sha256sum -c -
+BASE7="https://github.com/electron/electron/releases/download/v$ELECTRON_WIN7"
+curl -fsSL -o SHASUMS256-win7.txt "$BASE7/SHASUMS256.txt"
+F="electron-v$ELECTRON_WIN7-win32-ia32.zip"
+[ -f "$F" ] || curl -fsSL -o "$F" "$BASE7/$F"
+grep " \*$F\$" SHASUMS256-win7.txt | sed 's/ \*/  /' | sha256sum -c -
 tar xzf rcodesign.tgz
 RCS="$(ls -d "$WORK"/dl/apple-codesign-*/)rcodesign"
 
@@ -33,14 +40,16 @@ import json,sys
 p,v=sys.argv[1],sys.argv[2]; d=json.load(open(p)); d['version']=v; json.dump(d,open(p,'w'),indent=2)
 PY
 
-echo "Building Windows"
-W="$WORK/win/Card Receipt"; mkdir -p "$W"
-unzip -q "$WORK/dl/electron-v$ELECTRON-win32-x64.zip" -d "$W"
-rm -f "$W/resources/default_app.asar"
-mkdir -p "$W/resources/app"; cp "$APP"/* "$W/resources/app/"; cp "$ROOT/app/icon.ico" "$W/resources/app/"
-mv "$W/electron.exe" "$W/Card Receipt.exe"
-find "$W/locales" -name '*.pak' ! -name 'en-US.pak' ! -name 'en-GB.pak' ! -name 'es.pak' ! -name 'es-419.pak' ! -name 'fr.pak' -delete
-python3 - "$W/Card Receipt.exe" "$ROOT/app/icon.png" "$VERSION" "$PKG" <<'PY'
+build_win() {
+  ZIPIN=$1; DIR=$2; OUT=$3; README=$4
+  echo "Building $OUT"
+  W="$WORK/$DIR/Card Receipt"; mkdir -p "$W"
+  unzip -q "$WORK/dl/$ZIPIN" -d "$W"
+  rm -f "$W/resources/default_app.asar"
+  mkdir -p "$W/resources/app"; cp "$APP"/* "$W/resources/app/"; cp "$ROOT/app/icon.ico" "$W/resources/app/"
+  mv "$W/electron.exe" "$W/Card Receipt.exe"
+  find "$W/locales" -name '*.pak' ! -name 'en-US.pak' ! -name 'en-GB.pak' ! -name 'es.pak' ! -name 'es-419.pak' ! -name 'fr.pak' -delete
+  python3 - "$W/Card Receipt.exe" "$ROOT/app/icon.png" "$VERSION" "$PKG" <<'PY'
 import io,sys
 sys.path.insert(0,sys.argv[4]); import peicon
 from PIL import Image
@@ -53,8 +62,11 @@ peicon.set_strings(exe,{'FileDescription':'Card Receipt','ProductName':'Card Rec
   'InternalName':'Card Receipt','OriginalFilename':'Card Receipt.exe','FileVersion':ver,'ProductVersion':ver})
 print(peicon.get_strings(exe)['FileDescription'])
 PY
-sed 's/$/\r/' "$PKG/README-windows.txt" > "$W/Read me first.txt"
-(cd "$WORK/win" && zip -qr -9 "$DIST/Card-Receipt-Windows.zip" "Card Receipt")
+  sed 's/$/\r/' "$PKG/$README" > "$W/Read me first.txt"
+  (cd "$WORK/$DIR" && zip -qr -9 "$DIST/$OUT" "Card Receipt")
+}
+build_win "electron-v$ELECTRON-win32-x64.zip" win Card-Receipt-Windows.zip README-windows.txt
+build_win "electron-v$ELECTRON_WIN7-win32-ia32.zip" win7 Card-Receipt-Windows7-32bit.zip README-windows7.txt
 
 build_mac() {
   ARCH=$1; OUT=$2
